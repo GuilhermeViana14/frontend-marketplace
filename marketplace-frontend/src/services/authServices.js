@@ -1,67 +1,81 @@
 import api from './api';
 
 export const authService = {
-  // Registrar usuário
-  register: async (userData) => {
-    try {
-      const response = await api.post('api/auth/register', userData);
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error.message;
-    }
-  },
-
   // Login
   login: async (email, password) => {
     try {
-      const response = await api.post('api/auth/login', { email, password });
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      const response = await api.post('/api/auth/login', { email, password });
+      console.log('AuthService: Resposta completa da API:', response.data); // Debug
+      
+      // Extrair os dados corretos da resposta
+      const { data } = response.data; // Pega o 'data' de dentro da resposta
+      
+      if (data.token) {
+        // Retornar no formato que o contexto espera
+        return {
+          token: data.token,
+          user: data.user
+        };
       }
-      return response.data;
+      
+      throw new Error('Token não encontrado na resposta');
     } catch (error) {
+      console.error('AuthService: Erro no login:', error);
       throw error.response?.data || error.message;
     }
   },
 
-  // Logout
+  // Registrar usuário
+  register: async (userData) => {
+    try {
+      const response = await api.post('/api/auth/register', userData);
+      console.log('AuthService: Resposta do registro:', response.data); // Debug
+      
+      // Extrair os dados corretos da resposta
+      const { data } = response.data;
+      
+      if (data.token) {
+        return {
+          token: data.token,
+          user: data.user
+        };
+      }
+      
+      throw new Error('Token não encontrado na resposta');
+    } catch (error) {
+      console.error('AuthService: Erro no registro:', error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Resto dos métodos permanecem iguais...
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   },
 
-  // Obter perfil
   getProfile: async () => {
     try {
-      const response = await api.get('/auth/profile');
+      const response = await api.get('/api/auth/profile');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }
   },
 
-  // Atualizar perfil
   updateProfile: async (userData) => {
     try {
-      const response = await api.put('/auth/profile', userData);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const response = await api.put('/api/auth/profile', userData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }
   },
 
-  // Verificar se está logado
   isAuthenticated: () => {
     return !!localStorage.getItem('token');
   },
 
-  // Obter usuário atual
   getCurrentUser: () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;

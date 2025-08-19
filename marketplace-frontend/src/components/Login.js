@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
+import '../css/Login.css'
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -26,9 +26,17 @@ const Login = () => {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+      console.log('Fazendo login com:', formData); // Debug
+      const result = await login(formData.email, formData.password);
+      console.log('Resultado do login:', result); // Debug
+      
+      // Verificar se salvou no localStorage
+      console.log('Token salvo:', localStorage.getItem('token'));
+      console.log('User salvo:', localStorage.getItem('user'));
+      
+      navigate('/');
     } catch (error) {
+      console.error('Erro no login:', error); // Debug
       setError(error.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
@@ -40,7 +48,6 @@ const Login = () => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         {error && <div className="error">{error}</div>}
-        
         <div>
           <label>Email:</label>
           <input
@@ -51,7 +58,6 @@ const Login = () => {
             required
           />
         </div>
-
         <div>
           <label>Senha:</label>
           <input
@@ -62,14 +68,12 @@ const Login = () => {
             required
           />
         </div>
-
         <button type="submit" disabled={loading}>
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
-
       <p>
-        Não tem conta? <a href="/register">Cadastre-se</a>
+        Não tem conta? <a href="/cadastro">Cadastre-se</a>
       </p>
     </div>
   );
